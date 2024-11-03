@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, Session
 
 sqlite_database = 'sqlite:///tgbot.db'
 
-engine = create_engine(sqlite_database, echo=True)
+engine = create_engine(sqlite_database)
 
 class Base(DeclarativeBase):
     pass

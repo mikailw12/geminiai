@@ -1,7 +1,7 @@
 import google.generativeai as genai
-import config
+from config import API_KEY
 
-genai.configure(api_key=config.API_KEY)
+genai.configure(api_key=API_KEY)
 
 model = genai.GenerativeModel('gemini-1.5-flash')
 def text_request(request_text, user_history):

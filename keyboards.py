@@ -9,5 +9,5 @@ start_keyboard = ReplyKeyboardMarkup(keyboard=[
 admin_keyboard = ReplyKeyboardMarkup(keyboard=[
      [KeyboardButton(text='Мой профиль'),
      KeyboardButton(text='Информация')],
-     [KeyboardButton(text='Запустить рассылку')]
+     [KeyboardButton(text='Текстовая рассылка')]
 ], resize_keyboard=True)

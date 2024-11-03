@@ -45,7 +45,7 @@ with Session(autoflush=False, bind=engine) as db:
             db.commit()
             db.close()
     
-    async def spam():
+    async def get_users():
         users = []
         all_users = db.query(User).all()
         for user in all_users:
@@ -61,7 +61,7 @@ with Session(autoflush=False, bind=engine) as db:
     async def user_history(tg_id):
         user = db.query(User).filter(User.tg_id==tg_id).first()
         if user:
-            messages = user.messages[-10:]  # Берем последние 5 сообщений
+            messages = user.messages[-10:]  # Берем последние 10 сообщений
             context = " ".join([msg.text for msg in messages])
             return context 
         

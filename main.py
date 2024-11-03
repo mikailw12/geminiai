@@ -5,7 +5,10 @@ import config
 from aiogram import Bot, Dispatcher
 import database
 
+bot = None
+
 async def main():
+    global bot
     bot = Bot(token=config.TOKEN)
     dp = Dispatcher()
     dp.include_router(handlers.router)

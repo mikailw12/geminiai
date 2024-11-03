@@ -12,7 +12,7 @@ import main
 
 router = Router()
 
-class Request_text(StatesGroup):
+class spam_text(StatesGroup):
     text = State()
 
 
@@ -28,13 +28,30 @@ async def user_start(message:Message):
 
 @router.message(F.text=='Мой профиль')
 async def user_profile(message:Message):
-
     user_requests = await database.get_requests(message.from_user.id)
-    await message.answer(f'Ваш профиль:\n\nИмя: {message.from_user.first_name}\n\nКоличество оставшихся запросов: {str(user_requests)}')
+    await message.answer(f'Ваш профиль:\n\nИмя: {message.from_user.first_name}\n\nКоличество оставшихся запросов: {str(user_requests)}\nГлавное меню - /start')
 
 @router.message(F.text=='Информация')
 async def information(message:Message):
-    await message.answer('Данный бот разработан в развлекательных целях(но я пиздец заебался), вы можете делать текстовые запросы бла бла бла \nКонтакты: @recoil_sss')
+    await message.answer('Данный бот разработан в развлекательных целях, вы можете делать текстовые запросы \nКонтакты: @recoil_sss\nГлавное меню - /start')
+
+
+@router.message('Текстовая рассылка')
+async def spam(message:Message, state:FSMContext):
+    if message.from_user.id in config.ADMIN_LIST:
+        await message.answer('Введите текст для рассылки,\nГлавное меню - /start')
+        await state.set_state(spam_text.text)
+
+
+@router.message(spam_text.text)
+async def start_spam(message:Message, state:FSMContext):
+    data = await state.get_data()
+    await state.clear()
+    admin_text = data.get("text")
+    user_id = database.get_users()
+    for user_id in user_id:
+        await main.bot.send_message(chat_id=user_id, text=f'{admin_text}')
+
 
 @router.message(F.text)
 async  def user_make_request(message:Message):

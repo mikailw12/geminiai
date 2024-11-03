@@ -5,10 +5,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import CommandStart
 
 import keyboards
-import config
+from config import bot, ADMIN_LIST
 import database
 import api_requests
-import main
 
 router = Router()
 
@@ -19,9 +18,9 @@ class spam_text(StatesGroup):
 
 @router.message(CommandStart())
 async def user_start(message:Message):
-    if  message.from_user.id in config.ADMIN_LIST:
+    if  message.from_user.id in ADMIN_LIST:
         await database.add_user(message.from_user.id)
-        await message.answer('Привет, я бесплатный текстовый генератор Gemini\nИспользуй кнопки на клавиатуре, чтобы воспользоваться моим функционалом\nДля запроса просто отправь сообщение', reply_markup=keyboards.start_keyboard)
+        await message.answer('Привет, я бесплатный текстовый генератор Gemini\nИспользуй кнопки на клавиатуре, чтобы воспользоваться моим функционалом\nДля запроса просто отправь сообщение', reply_markup=keyboards.admin_keyboard)
     else:
         await database.add_user(message.from_user.id)
         await message.answer('Привет, я бесплатный текстовый генератор Gemini\nИспользуй кнопки на клавиатуре, чтобы воспользоваться моим функционалом\nДля запроса просто отправь сообщение', reply_markup=keyboards.start_keyboard)
@@ -36,21 +35,22 @@ async def information(message:Message):
     await message.answer('Данный бот разработан в развлекательных целях, вы можете делать текстовые запросы \nКонтакты: @recoil_sss\nГлавное меню - /start')
 
 
-@router.message('Текстовая рассылка')
+@router.message(F.text=='Текстовая рассылка')
 async def spam(message:Message, state:FSMContext):
-    if message.from_user.id in config.ADMIN_LIST:
+    if message.from_user.id in ADMIN_LIST:
         await message.answer('Введите текст для рассылки,\nГлавное меню - /start')
         await state.set_state(spam_text.text)
 
 
 @router.message(spam_text.text)
 async def start_spam(message:Message, state:FSMContext):
+    from main import bot
     data = await state.get_data()
     await state.clear()
     admin_text = data.get("text")
-    user_id = database.get_users()
-    for user_id in user_id:
-        await main.bot.send_message(chat_id=user_id, text=f'{admin_text}')
+    users_id = await database.get_users()
+    for user_id in users_id:
+        await bot.send_message(chat_id=user_id, text=f'{admin_text}')
 
 
 @router.message(F.text)

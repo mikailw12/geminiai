@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, Session
 
 sqlite_database = 'sqlite:///tgbot.db'
 
-engine = create_engine(sqlite_database)
+engine = create_engine(sqlite_database, echo=True)
 
 class Base(DeclarativeBase):
     pass
@@ -22,8 +22,8 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    text = Column(String)
-
+    request_text = Column(String)
+    answer_text = Column(String)
     user = relationship('User', back_populates='messages')
 
 
@@ -36,11 +36,11 @@ with Session(autoflush=False, bind=engine) as db:
             db.commit()
             db.close()
     
-    async def made_request(tg_id, message_text):
+    async def made_request(tg_id, request_text, answer_text):
         user = db.query(User).filter(User.tg_id==tg_id).first()
         if user:
             user.requests -= 1
-            new_message = Message(text=message_text, user=user)
+            new_message = Message(request_text=request_text, answer_text=answer_text, user=user)
             db.add(new_message)
             db.commit()
             db.close()
@@ -59,10 +59,11 @@ with Session(autoflush=False, bind=engine) as db:
     
     
     async def user_history(tg_id):
-        user = db.query(User).filter(User.tg_id==tg_id).first()
+        user = db.query(User).filter(User.tg_id == tg_id).first()
         if user:
-            messages = user.messages[-10:]  # Берем последние 10 сообщений
-            context = " ".join([msg.text for msg in messages])
-            return context 
-        
+            messages = (db.query(Message).filter(Message.user_id == user.id).order_by(Message.id.desc()).limit(5).all())
+            context = ""
+            for message in reversed(messages):  # Переворачиваем список для хронологии
+                context += f"\n\nЗапрос: {message.request_text}\nОтвет: {message.answer_text}"
+            return context
 

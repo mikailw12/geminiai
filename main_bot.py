@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import CommandStart
 from api_requests import text_request
-from database import user_history, get_requests, made_request, get_users, add_user, Base, engine
+from database import get_requests, made_request, get_users, user_history, add_user, Base, engine
 from keyboards_bot import start_keyboard, admin_keyboard
 
 bot = Bot(token=TOKEN)
@@ -62,11 +62,11 @@ async def start_spam(message: Message, state: FSMContext):
 @dp.message(F.text)
 async  def user_make_request(message:Message):
     wait_message = await message.answer('Ожидайте ответа...')
-    user_history = await user_history(message.from_user.id)
-    request_answer = text_request(message.text, user_history)
+    user_history_data = await user_history(message.from_user.id)
+    request_answer = text_request(message.text, user_history_data)
 
     if request_answer:
-        await made_request(message.from_user.id, message.text)
+        await made_request(message.from_user.id, message.text, request_answer)
         await message.answer(request_answer)
         await bot.delete_message(chat_id=message.from_user.id, message_id=wait_message.message_id)
     else:

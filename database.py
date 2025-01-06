@@ -13,7 +13,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     tg_id = Column(Integer)
-    requests = Column(Integer, default=50)
+    requests = Column(Integer, default=999)
     
     messages = relationship("Message", back_populates="user")
 
